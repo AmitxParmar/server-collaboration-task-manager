@@ -17,7 +17,6 @@
     }
   },
   "scripts": {
-    "prepare": "is-ci || husky",
     "prebuild": "pnpm run clean:build",
     "build": "pnpm run prisma:generate && pkgroll",
     "start": "cross-env FORCE_COLOR=2 node ./dist/index.cjs",
@@ -47,7 +46,7 @@
       "path": "cz-conventional-changelog"
     }
   },
-  "author": "akhil chandran",
+  "author": "amit parmar",
   "engines": {
     "node": ">=16.0.0"
   },
@@ -114,7 +113,6 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-unicorn": "^62.0.0",
     "express-jsdoc-swagger": "^1.8.0",
-    "husky": "^9.1.7",
     "is-ci": "^4.1.0",
     "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
