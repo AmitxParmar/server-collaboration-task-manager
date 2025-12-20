@@ -97,7 +97,6 @@
     "@types/jwk-to-pem": "^2.0.3",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.3",
-    "@types/socket.io": "^3.0.2",
     "@types/superagent": "8.1.9",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
