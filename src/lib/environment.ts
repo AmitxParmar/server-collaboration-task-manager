@@ -26,6 +26,7 @@ class Environment implements IEnvironment {
   private _port: number;
   private _env: Environments;
   private _appUrl: string;
+  private _clientUrl: string;
 
   constructor() {
     this.port = Number(process.env.PORT) ?? appConfig.defaultPort;
@@ -56,6 +57,14 @@ class Environment implements IEnvironment {
     this._appUrl = value;
   }
 
+  get clientUrl() {
+    return this._clientUrl;
+  }
+
+  set clientUrl(value) {
+    this._clientUrl = value;
+  }
+
   private resolveEnvPath(key: CommonEnvKeys): string {
     // On priority bar, .env.[NODE_ENV] has higher priority than default env file (.env)
     // If both are not resolved, error is thrown.
@@ -72,6 +81,7 @@ class Environment implements IEnvironment {
     const env = cleanEnv(process.env, envValidationConfig);
     this.port = env.PORT;
     this.appUrl = env.APP_BASE_URL;
+    this.clientUrl = env.CLIENT_URL;
   }
 
   public setEnvironment(env = Environments.DEV): void {

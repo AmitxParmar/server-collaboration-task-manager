@@ -1,10 +1,16 @@
+import { createServer } from 'http';
 import App from './app';
+import socketService from './lib/socket';
 
 const app = new App();
-const server = app.express;
+const httpServer = createServer(app.express);
 
+// Initialize Socket.io
+socketService.initialize(httpServer);
+
+// Connect Prisma
 app.connectPrisma().catch((e) => {
   throw e;
 });
 
-export default server;
+export default httpServer;

@@ -3,6 +3,7 @@ import nocache from 'nocache';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
 import home from './home';
 import environment from './lib/environment';
@@ -25,11 +26,26 @@ class App {
   }
 
   private setMiddlewares(): void {
-    this.express.use(cors());
+    const allowedOrigins = [environment.clientUrl];
+
+    this.express.use(cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or Postman)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin) || environment.isDev()) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
+      credentials: true,
+    }));
     this.express.use(morgan('dev'));
     this.express.use(nocache());
     this.express.use(express.json());
     this.express.use(express.urlencoded({ extended: true }));
+    this.express.use(cookieParser());
     this.express.use(helmet());
     this.express.use(express.static('public'));
   }
