@@ -71,6 +71,15 @@ task.post('/', RequestValidator.validate(CreateTaskDto), controller.create);
 task.get('/', controller.findAll);
 
 /**
+ * GET /tasks/dashboard
+ * @summary Get dashboard statistics
+ * @tags tasks
+ * @security bearerAuth
+ * @return {DashboardStats} 200 - Dashboard stats
+ */
+task.get('/dashboard', controller.getDashboardStats);
+
+/**
  * GET /tasks/:id
  * @summary Get a task by ID
  * @tags tasks

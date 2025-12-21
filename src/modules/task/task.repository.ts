@@ -14,6 +14,16 @@ export interface TaskWithRelations extends Task {
     assignee?: { id: string; name: string; email: string };
 }
 
+export interface DashboardStats {
+    counts: {
+        total: number;
+        todo: number;
+        inProgress: number;
+        completed: number;
+    };
+    recentTasks: TaskWithRelations[];
+}
+
 export class TaskRepository {
     private readonly userSelect = {
         id: true,
@@ -135,6 +145,39 @@ export class TaskRepository {
             select: { id: true },
         });
         return !!task;
+    }
+
+    /**
+     * Gets dashboard statistics for a user
+     * @param userId - User ID
+     * @returns Dashboard stats including counts and recent tasks
+     */
+    public async getDashboardStats(userId: string): Promise<DashboardStats> {
+        const [total, todo, inProgress, completed, recentTasks] = await prisma.$transaction([
+            prisma.task.count({ where: { assignedToId: userId } }),
+            prisma.task.count({ where: { assignedToId: userId, status: 'TODO' } }),
+            prisma.task.count({ where: { assignedToId: userId, status: 'IN_PROGRESS' } }),
+            prisma.task.count({ where: { assignedToId: userId, status: 'COMPLETED' } }),
+            prisma.task.findMany({
+                where: { assignedToId: userId },
+                orderBy: { updatedAt: 'desc' },
+                take: 5,
+                include: {
+                    creator: { select: this.userSelect },
+                    assignee: { select: this.userSelect },
+                },
+            }),
+        ]);
+
+        return {
+            counts: {
+                total,
+                todo,
+                inProgress,
+                completed,
+            },
+            recentTasks,
+        };
     }
 }
 

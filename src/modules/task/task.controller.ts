@@ -3,7 +3,7 @@ import { HttpStatusCode } from 'axios';
 import TaskService from './task.service';
 import { type CustomResponse } from '@/types/common.type';
 import { type AuthRequest } from '@/types/auth.type';
-import { type TaskWithRelations } from './task.repository';
+import { type TaskWithRelations, type DashboardStats } from './task.repository';
 import Api from '@/lib/api';
 
 export default class TaskController extends Api {
@@ -88,6 +88,24 @@ export default class TaskController extends Api {
         try {
             await this.taskService.delete(req.params.id);
             this.send(res, null, HttpStatusCode.Ok, 'Task deleted successfully');
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    /**
+     * GET /tasks/dashboard - Get dashboard statistics
+     */
+    public getDashboardStats = async (
+        req: AuthRequest,
+        res: CustomResponse<DashboardStats>,
+        next: NextFunction
+    ) => {
+        try {
+            const stats = await this.taskService.getDashboardStats({
+                userId: req.user!.id,
+            });
+            this.send(res, stats, HttpStatusCode.Ok, 'Dashboard stats retrieved successfully');
         } catch (e) {
             next(e);
         }

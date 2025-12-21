@@ -1,4 +1,4 @@
-import taskRepository, { type TaskFilters, type TaskWithRelations } from './task.repository';
+import taskRepository, { type TaskFilters, type TaskWithRelations, type DashboardStats } from './task.repository';
 import { type CreateTaskDto, type UpdateTaskDto, type TaskQueryDto } from '@/dto/task.dto';
 import { HttpNotFoundError, HttpBadRequestError } from '@/lib/errors';
 import authRepository from '@/modules/auth/auth.repository';
@@ -174,5 +174,14 @@ export default class TaskService {
 
         // Emit socket event for real-time update
         socketService.emitTaskDeleted(id);
+    }
+
+    /**
+     * Gets dashboard statistics for a user
+     * @param options - Service options including current user ID
+     * @returns Dashboard stats
+     */
+    public async getDashboardStats(options: TaskServiceOptions): Promise<DashboardStats> {
+        return taskRepository.getDashboardStats(options.userId);
     }
 }
