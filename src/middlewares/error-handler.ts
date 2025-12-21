@@ -9,6 +9,7 @@ interface ErrorBody {
   success: false;
   message: string;
   rawErrors?: string[];
+  code?: string;
   stack?: string;
 }
 
@@ -31,6 +32,10 @@ const errorHandler = (
     message: err.message,
     rawErrors: err.rawErrors,
   };
+
+  if (err.code) {
+    errorBody.code = err.code;
+  }
 
   if (environment.isDev()) {
     errorBody.stack = err.stack;
