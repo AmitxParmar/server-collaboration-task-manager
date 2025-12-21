@@ -1,15 +1,18 @@
-import taskRepository, { type TaskFilters, type TaskWithRelations, type DashboardStats } from './task.repository';
+import taskRepository, { type TaskFilters, type TaskWithRelations } from './task.repository';
 import { type CreateTaskDto, type UpdateTaskDto, type TaskQueryDto } from '@/dto/task.dto';
 import { HttpNotFoundError, HttpBadRequestError } from '@/lib/errors';
 import authRepository from '@/modules/auth/auth.repository';
 import logger from '@/lib/logger';
 import socketService from '@/lib/socket';
+import NotificationService from '@/modules/notification/notification.service';
 
 export interface TaskServiceOptions {
     userId: string;
 }
 
 export default class TaskService {
+    private readonly notificationService = new NotificationService();
+
     /**
      * Creates a new task
      * @param data - Task creation data from DTO
@@ -42,11 +45,12 @@ export default class TaskService {
 
         // Notify assignee if different from creator
         if (data.assignedToId !== options.userId) {
-            socketService.notifyTaskAssigned(data.assignedToId, {
-                taskId: task.id,
-                task,
-                newAssigneeId: data.assignedToId,
-            });
+            await this.notificationService.createTaskAssignmentNotification(
+                task.id,
+                data.assignedToId,
+                task.title,
+                task
+            );
         }
 
         return task;
@@ -148,12 +152,12 @@ export default class TaskService {
 
         // Notify new assignee if assignment changed
         if (data.assignedToId && data.assignedToId !== existingTask.assignedToId) {
-            socketService.notifyTaskAssigned(data.assignedToId, {
-                taskId: id,
-                task: updatedTask,
-                previousAssigneeId: existingTask.assignedToId,
-                newAssigneeId: data.assignedToId,
-            });
+            await this.notificationService.createTaskAssignmentNotification(
+                updatedTask.id,
+                data.assignedToId,
+                updatedTask.title,
+                updatedTask
+            );
         }
 
         return updatedTask;
@@ -181,7 +185,7 @@ export default class TaskService {
      * @param options - Service options including current user ID
      * @returns Dashboard stats
      */
-    public async getDashboardStats(options: TaskServiceOptions): Promise<DashboardStats> {
+    public async getDashboardStats(options: TaskServiceOptions): Promise<any> {
         return taskRepository.getDashboardStats(options.userId);
     }
 }
