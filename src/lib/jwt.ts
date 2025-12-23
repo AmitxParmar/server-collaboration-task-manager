@@ -1,6 +1,10 @@
 import jwt, { type SignOptions, type Secret } from 'jsonwebtoken';
 import { type JwtPayload, type TokenPair } from '@/types/auth.type';
 
+export type TokenVerifyResult =
+    | { valid: true; payload: JwtPayload }
+    | { valid: false; error: 'EXPIRED' | 'INVALID' };
+
 class JwtService {
     private readonly accessSecret: Secret;
     private readonly refreshSecret: Secret;
@@ -35,6 +39,7 @@ class JwtService {
         };
     }
 
+    // Legacy method for backward compatibility
     public verifyAccessToken(token: string): JwtPayload | null {
         try {
             return jwt.verify(token, this.accessSecret) as JwtPayload;
@@ -43,11 +48,40 @@ class JwtService {
         }
     }
 
+    // New method with detailed error info
+    public verifyAccessTokenDetailed(token: string): TokenVerifyResult {
+        try {
+            const payload = jwt.verify(token, this.accessSecret) as JwtPayload;
+            return { valid: true, payload };
+        } catch (error) {
+            // Check if error is a TokenExpiredError by name (works with CJS modules)
+            if (error instanceof Error && error.name === 'TokenExpiredError') {
+                return { valid: false, error: 'EXPIRED' };
+            }
+            return { valid: false, error: 'INVALID' };
+        }
+    }
+
+    // Legacy method for backward compatibility
     public verifyRefreshToken(token: string): JwtPayload | null {
         try {
             return jwt.verify(token, this.refreshSecret) as JwtPayload;
         } catch {
             return null;
+        }
+    }
+
+    // New method with detailed error info
+    public verifyRefreshTokenDetailed(token: string): TokenVerifyResult {
+        try {
+            const payload = jwt.verify(token, this.refreshSecret) as JwtPayload;
+            return { valid: true, payload };
+        } catch (error) {
+            // Check if error is a TokenExpiredError by name (works with CJS modules)
+            if (error instanceof Error && error.name === 'TokenExpiredError') {
+                return { valid: false, error: 'EXPIRED' };
+            }
+            return { valid: false, error: 'INVALID' };
         }
     }
 

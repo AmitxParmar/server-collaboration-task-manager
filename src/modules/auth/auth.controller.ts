@@ -99,8 +99,9 @@ export default class AuthController extends Api {
 
       if (!refreshToken) {
         cookieService.clearTokenCookies(res);
-        return res.status(HttpStatusCode.Unauthorized).json({
+        return res.status(HttpStatusCode.Unauthorized).send({
           message: 'No refresh token provided',
+          code: 'REFRESH_TOKEN_MISSING',
           data: null,
         });
       }

@@ -122,22 +122,28 @@ export default class AuthService {
     userAgent?: string,
     ipAddress?: string
   ): Promise<TokenPair> {
-    // Verify refresh token
-    const payload = jwtService.verifyRefreshToken(refreshToken);
-    if (!payload) {
-      throw new HttpUnAuthorizedError('Invalid or expired refresh token');
+    // Verify refresh token with detailed error info
+    const result = jwtService.verifyRefreshTokenDetailed(refreshToken);
+
+    if (!result.valid) {
+      if (result.error === 'EXPIRED') {
+        throw new HttpUnAuthorizedError('Refresh token has expired', 'REFRESH_TOKEN_EXPIRED');
+      }
+      throw new HttpUnAuthorizedError('Invalid refresh token', 'REFRESH_TOKEN_INVALID');
     }
+
+    const payload = result.payload;
 
     // Find session
     const session = await authRepository.findSessionByToken(refreshToken);
     if (!session) {
-      throw new HttpUnAuthorizedError('Session not found or expired');
+      throw new HttpUnAuthorizedError('Session not found or expired', 'REFRESH_TOKEN_INVALID');
     }
 
     // Check if session is expired
     if (session.expiresAt < new Date()) {
       await authRepository.deleteSession(refreshToken);
-      throw new HttpUnAuthorizedError('Session expired');
+      throw new HttpUnAuthorizedError('Session expired', 'REFRESH_TOKEN_EXPIRED');
     }
 
     // Delete old session

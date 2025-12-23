@@ -17,14 +17,18 @@ export const verifyAuthToken = async (
       throw new HttpUnAuthorizedError('Access token not provided', 'ACCESS_TOKEN_MISSING');
     }
 
-    // Verify access token
-    const payload = jwtService.verifyAccessToken(accessToken);
-    if (!payload) {
-      throw new HttpUnAuthorizedError('Invalid or expired access token', 'ACCESS_TOKEN_EXPIRED');
+    // Verify access token with detailed error info
+    const result = jwtService.verifyAccessTokenDetailed(accessToken);
+
+    if (!result.valid) {
+      if (result.error === 'EXPIRED') {
+        throw new HttpUnAuthorizedError('Access token has expired', 'ACCESS_TOKEN_EXPIRED');
+      }
+      throw new HttpUnAuthorizedError('Invalid access token', 'ACCESS_TOKEN_INVALID');
     }
 
     // Get user from database
-    const user = await authRepository.findUserById(payload.userId);
+    const user = await authRepository.findUserById(result.payload.userId);
     if (!user) {
       throw new HttpUnAuthorizedError('User not found', 'USER_NOT_FOUND');
     }
