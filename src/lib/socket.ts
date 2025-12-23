@@ -39,7 +39,11 @@ class SocketService {
         // Authentication middleware
         this.io.use(async (socket: AuthenticatedSocket, next) => {
             try {
-                const token = socket.handshake.auth?.token ||
+                // Parse cookies from handshake headers
+                const cookieHeader = socket.handshake.headers?.cookie || '';
+                const cookies = this.parseCookies(cookieHeader);
+                const token = cookies['access_token'] ||
+                    socket.handshake.auth?.token ||
                     socket.handshake.headers?.authorization?.replace('Bearer ', '');
 
                 if (!token) {
@@ -100,6 +104,22 @@ class SocketService {
         socket.on(SocketEvents.DISCONNECT, () => {
             logger.info(`User disconnected: ${userId}`);
         });
+    }
+
+    /**
+     * Parse cookie header string into key-value pairs
+     */
+    private parseCookies(cookieHeader: string): Record<string, string> {
+        const cookies: Record<string, string> = {};
+        if (!cookieHeader) return cookies;
+
+        cookieHeader.split(';').forEach((cookie) => {
+            const [name, ...rest] = cookie.split('=');
+            if (name && rest.length > 0) {
+                cookies[name.trim()] = rest.join('=').trim();
+            }
+        });
+        return cookies;
     }
 
     /**
