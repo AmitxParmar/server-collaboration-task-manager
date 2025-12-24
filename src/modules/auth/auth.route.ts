@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Controller from './auth.controller';
-import { RegisterDto, LoginDto } from '@/dto/user.dto';
+import { RegisterDto, LoginDto, UpdateProfileDto } from '@/dto/user.dto';
 import RequestValidator from '@/middlewares/request-validator';
 import { verifyAuthToken } from '@/middlewares/auth';
 
@@ -85,5 +85,20 @@ auth.post('/refresh', controller.refresh);
  * @return {User} 200 - current user
  */
 auth.get('/me', verifyAuthToken, controller.me);
+
+/**
+ * PATCH /auth/me
+ * @summary Update current user profile
+ * @tags auth
+ * @security bearerAuth
+ * @param {UpdateProfileDto} request.body.required
+ * @return {User} 200 - updated user
+ */
+auth.patch(
+  '/me',
+  verifyAuthToken,
+  RequestValidator.validate(UpdateProfileDto),
+  controller.updateProfile
+);
 
 export default auth;

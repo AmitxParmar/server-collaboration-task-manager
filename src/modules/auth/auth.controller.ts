@@ -142,4 +142,24 @@ export default class AuthController extends Api {
       next(e);
     }
   };
+
+  public updateProfile = async (
+    req: AuthRequest,
+    res: CustomResponse<SafeUser | null>,
+    next: NextFunction
+  ) => {
+    try {
+      if (!req.user) {
+        return res.status(HttpStatusCode.Unauthorized).json({
+          message: 'Not authenticated',
+          data: null,
+        });
+      }
+
+      const user = await this.authService.updateProfile(req.user.id, req.body);
+      this.send(res, user, HttpStatusCode.Ok, 'Profile updated successfully');
+    } catch (e) {
+      next(e);
+    }
+  };
 }

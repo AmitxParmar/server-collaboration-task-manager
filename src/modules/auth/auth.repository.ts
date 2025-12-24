@@ -78,6 +78,24 @@ export class AuthRepository {
             },
         });
     }
+
+    public async updateUser(
+        id: string,
+        data: { name?: string; email?: string }
+    ): Promise<SafeUser> {
+        const user = await prisma.user.update({
+            where: { id },
+            data,
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+        return user as SafeUser;
+    }
 }
 
 export default new AuthRepository();

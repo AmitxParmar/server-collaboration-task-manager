@@ -176,6 +176,24 @@ export default class AuthService {
     return authRepository.findUserById(payload.userId);
   }
 
+
+  public async updateProfile(
+    userId: string,
+    data: { name?: string; email?: string }
+  ): Promise<SafeUser> {
+    // Check if email is being updated and if it's already taken
+    if (data.email) {
+      const existingUser = await authRepository.findUserByEmail(data.email);
+      if (existingUser && existingUser.id !== userId) {
+        throw new HttpBadRequestError('Profile update failed', [
+          'Email is already in use by another account',
+        ]);
+      }
+    }
+
+    return authRepository.updateUser(userId, data);
+  }
+
   public async getCurrentUser(userId: string): Promise<SafeUser | null> {
     return authRepository.findUserById(userId);
   }
