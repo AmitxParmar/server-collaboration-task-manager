@@ -6,7 +6,7 @@ export default class UserService {
     /**
      * Get all users
      */
-    public async getAllUsers(search?: string): Promise<Omit<User, 'passwordHash'>[]> {
-        return userRepository.findAll(search);
+    public async getAllUsers(search?: string, userId?: User['id']): Promise<Omit<User, 'passwordHash'>[]> {
+        return userRepository.findAll(search, userId);
     }
 }

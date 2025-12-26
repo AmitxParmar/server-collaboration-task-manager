@@ -36,7 +36,7 @@ export default class TaskController extends Api {
         next: NextFunction
     ) => {
         try {
-            const tasks = await this.taskService.findAll(req.query as any, {
+            const tasks = await this.taskService.findAll(req.query, {
                 userId: req.user!.id,
             });
             this.send(res, tasks, HttpStatusCode.Ok, 'Tasks retrieved successfully');

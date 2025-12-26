@@ -60,4 +60,4 @@ export type ContextTarget<This, TReturn> = (
  */
 export type DescriptorValue<
   TArgs extends DefaultDecoratorArgs = DefaultDecoratorArgs,
-> = (...args: DecoratorArgs<TArgs>) => any;
+> = (...args: DecoratorArgs<TArgs>) => unknown;

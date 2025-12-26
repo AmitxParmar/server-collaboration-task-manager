@@ -1,6 +1,7 @@
 
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import UserService from './user.service';
+import { AuthRequest } from '@/types/auth.type';
 
 class UserController {
     private userService = new UserService();
@@ -9,13 +10,14 @@ class UserController {
      * Get all users
      */
     public getAllUsers = async (
-        req: Request,
+        req: AuthRequest,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
             const search = req.query.search as string | undefined;
-            const users = await this.userService.getAllUsers(search);
+            const userId = req.user!.id;
+            const users = await this.userService.getAllUsers(search, userId);
             res.status(200).json({
                 data: users,
                 message: 'Users retrieved successfully',

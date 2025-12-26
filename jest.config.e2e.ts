@@ -1,4 +1,4 @@
-import config from './jest.config.js';
+import config from './jest.config.ts';
 
 const e2eConfig: typeof config = {
   ...config,

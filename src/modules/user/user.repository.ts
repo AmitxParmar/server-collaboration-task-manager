@@ -1,18 +1,24 @@
 
 import prisma from '@/lib/prisma';
-import { User } from '@prisma/client';
+import { User, Prisma } from '@prisma/client';
 
 export class UserRepository {
     /**
      * Finds all users
      */
-    public async findAll(search?: string): Promise<Omit<User, 'passwordHash'>[]> {
-        const where = search ? {
+    public async findAll(search?: string, userId?: User['id']): Promise<Omit<User, 'passwordHash'>[]> {
+        const where: Prisma.UserWhereInput = search ? {
             OR: [
                 { name: { contains: search, mode: 'insensitive' as const } },
                 { email: { contains: search, mode: 'insensitive' as const } }
             ]
         } : {};
+
+        if (userId) {
+            where.id = {
+                not: userId
+            };
+        }
 
         return prisma.user.findMany({
             where,

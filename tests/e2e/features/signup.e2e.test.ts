@@ -22,7 +22,7 @@ describe('[e2e] - sign up a user', () => {
   });
 
   afterAll(async () => {
-    await prismaClient.users.deleteMany({
+    await prismaClient.user.deleteMany({
       where: {
         AND: [{ name, email }],
       },

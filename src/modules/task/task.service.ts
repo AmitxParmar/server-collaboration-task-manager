@@ -5,9 +5,20 @@ import authRepository from '@/modules/auth/auth.repository';
 import logger from '@/lib/logger';
 import socketService from '@/lib/socket';
 import NotificationService from '@/modules/notification/notification.service';
+import { Task } from '@prisma/client';
 
 export interface TaskServiceOptions {
     userId: string;
+}
+
+export interface TaskDashboardResponse {
+    counts: {
+        total: number
+        todo: number
+        inProgress: number
+        completed: number
+    }
+    recentTasks: Task[]
 }
 
 export default class TaskService {
@@ -185,7 +196,7 @@ export default class TaskService {
      * @param options - Service options including current user ID
      * @returns Dashboard stats
      */
-    public async getDashboardStats(options: TaskServiceOptions): Promise<any> {
+    public async getDashboardStats(options: TaskServiceOptions): Promise<TaskDashboardResponse> {
         return taskRepository.getDashboardStats(options.userId);
     }
 }

@@ -1,4 +1,4 @@
-import config from './jest.config.js';
+import config from './jest.config.ts';
 
 const unitConfig: typeof config = {
   ...config,
