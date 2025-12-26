@@ -196,6 +196,29 @@ http://localhost:8000/v1/swagger
 
 ---
 
+## 💡 Design Decisions
+
+### Database Selection: MongoDB
+I chose **MongoDB** for this project for several key reasons:
+1.  **Flexible Schema**: Task management systems often evolve. MongoDB's schema-less nature allows me to easily add new fields (like custom tags, checklists, or dynamic attachments) to tasks without complex migrations.
+2.  **JSON Native**: Being a full-stack JavaScript application (Node.js + React), storing data as BSON (Binary JSON) simplifies the data flow. Objects retrieved from the DB map directly to my TypeScript interfaces without impedence mismatch.
+3.  **Scalability**: MongoDB's document model is well-suited for read-heavy dashboards where I need to fetch a task and all its related metadata (comments, history) in a single query.
+
+### Authentication: JWT with Access & Refresh Tokens
+I implemented a robust dual-token system:
+- **Access Token**: Short-lived (15 min), useful for authenticating API requests.
+- **Refresh Token**: Long-lived (7 days), stored securely in an **HTTP-only cookie**. This protects against XSS attacks since the client JavaScript cannot access the long-term secret, while still allowing for seamless "keep-me-logged-in" functionality.
+
+### Service Layer Pattern
+I separated business logic (Services) from HTTP transport (Controllers) and Data Access (Repositories). This separation ensures that my business rules (e.g., "User A can only edit their own tasks") are testable in isolation without mocking Express request/response objects.
+
+### Trade-offs & Assumptions
+- **Assumption**: A user can see all other users in the system to assign tasks. In a real multi-tenant SaaS, this would be restricted to the same "Organization".
+- **Trade-off**: I chose **JWTs** for statelessness over server-side sessions. The trade-off is that instant revocation of a specific access token is harder (requires a blacklist or short expiry). I mitigated this by setting a short 15-minute expiry for access tokens.
+- **Trade-off**: **MongoDB** lacks the rigid referential integrity of SQL. I handle relations (like User-Task) at the application level using Prisma, accepting slightly more complex application logic for greater development speed and flexibility.
+
+---
+
 ## 🏗 Architecture
 
 ### Project Structure
