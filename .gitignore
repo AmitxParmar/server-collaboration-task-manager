@@ -14,7 +14,7 @@ dist
 lib-cov
 
 # Lock files
-pnpm-lock.yaml
+
 yarn.lock
 
 
