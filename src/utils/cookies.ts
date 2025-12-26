@@ -3,11 +3,11 @@ import type { Response, CookieOptions } from 'express';
 
 
 export class CookieService {
-    private getCookieOptions(maxAge: number): CookieOptions {
+    private getCookieOptions(maxAge?: number): CookieOptions {
         return {
             httpOnly: true,
             secure: !environment.isDev(),
-            sameSite: environment.isDev() ? 'lax' : 'strict',
+            sameSite: environment.isDev() ? 'lax' : 'none',
             maxAge,
             path: '/',
         };
@@ -26,8 +26,11 @@ export class CookieService {
     }
 
     public clearTokenCookies(res: Response): void {
-        res.clearCookie('access_token', { path: '/' });
-        res.clearCookie('refresh_token', { path: '/' });
+        // Helper to get options without maxAge for clearing
+        const options = this.getCookieOptions();
+
+        res.clearCookie('access_token', options);
+        res.clearCookie('refresh_token', options);
     }
 }
 
