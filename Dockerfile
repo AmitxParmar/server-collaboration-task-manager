@@ -4,12 +4,6 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-# Dependencies stage (Prod only)
-FROM base AS deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --no-frozen-lockfile
-
 # Builder stage
 FROM base AS builder
 WORKDIR /app
@@ -18,6 +12,7 @@ RUN pnpm install --no-frozen-lockfile
 COPY . .
 RUN npx prisma generate
 RUN pnpm run build
+RUN pnpm prune --prod
 
 # Runner stage
 FROM base AS runner
@@ -25,10 +20,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copy specific things we need
-COPY --from=deps /app/node_modules ./node_modules
+# We copy node_modules from builder because it contains the generated prisma client
+# and has been pruned to only production dependencies
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-# Copy generated prisma client (it lives in .prisma in node_modules)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY package.json ./
 
 EXPOSE 3000
